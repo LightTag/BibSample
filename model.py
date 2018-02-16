@@ -7,13 +7,13 @@ BP = pickle.load(open('./preppy.pkl','rb'))
 
 
 class Model():
-    def __init__(self, inputs):
+    def __init__(self, inputs,gs):
         sequence = inputs['seq']
         lengths = inputs['length']
         book_id = inputs['book_id']
         self.lr = tf.placeholder(shape=None, dtype=tf.float32)
         self.keep_prob = tf.placeholder(shape=None, dtype=tf.float32)
-        self.gs = tf.train.get_or_create_global_step()
+        self.gs = gs
         self.increment_gs = tf.assign(self.gs, self.gs+1) #To increment during val
 
 
