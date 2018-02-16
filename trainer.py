@@ -1,12 +1,12 @@
 import tensorflow as tf
 
-from model import Model
+from model import Model,BP
 
 from prepare_dataset import prepare_dataset_iterators
 
 if __name__=="__main__":
     #Make datasets for train and validation
-    next_element, training_init_op, validation_init_op = prepare_dataset_iterators()
+    next_element, training_init_op, validation_init_op = prepare_dataset_iterators(batch_size=64)
 
 
     train_writer = tf.summary.FileWriter("./logs/train")
@@ -32,6 +32,12 @@ if __name__=="__main__":
                 _, summary,gs = sess.run([M.train,M.write_op,M.gs],feed_dict={M.lr: lr, M.keep_prob:keep_prob})
                 train_writer.add_summary(summary, gs)
                 train_writer.flush()
+                if gs %20 ==0:
+                    inp,out,lengths = sess.run([M.sequence,M.lm_preds,M.lengths],feed_dict={M.lr: lr, M.keep_prob:keep_prob})
+                    print("{gs}************************************************".format(gs=gs))
+                    print(BP.ids_to_string(inp[0],lengths[0]))
+                    print("<start>"+BP.ids_to_string(out[0], lengths[0]))
+
             except tf.errors.OutOfRangeError:
                 #If the iterator is empty stop the while loop
                 break

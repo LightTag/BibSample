@@ -5,6 +5,7 @@ from collections import defaultdict, Counter
 import numpy as np
 import tensorflow as tf
 PAD = "<PAD>"
+START ="<START>"
 EOS = "<EOS>"
 
 
@@ -17,8 +18,9 @@ class Preppy():
         self.vocab = defaultdict(self.next_value) #map tokens to ids. Automatically gets next id when needed
         self.token_counter = Counter() #Counts the token frequency
         self.vocab[PAD] = 0
-        self.vocab[EOS] = 1
-        self.next = 2 #After 1 comes two
+        self.vocab[START] = 1
+        self.vocab[EOS] = 2
+        self.next = 2 #After 2 comes 3
         self.tokenizer = tokenizer_fn
         self.reverse_vocab = {}
 
@@ -36,19 +38,26 @@ class Preppy():
         id_list = self.sentance_to_id_list(sequence)
         ex = tf.train.SequenceExample()
         # A non-sequential feature of our example
-        sequence_length = len(sequence)
+        sequence_length = len(sequence)+2 #For start and end
         #Add the context feature, here we just need length
         ex.context.feature["length"].int64_list.value.append(sequence_length)
         # Feature lists for the two sequential features of our example
         #Add the tokens. This is the core sequence.
         #You can add another sequence in the feature_list dictionary, for translation for instance
         fl_tokens = ex.feature_lists.feature_list["tokens"]
-
+        #Prepend with start token
+        fl_tokens.feature.add().int64_list.value.append(self.vocab[START])
         for token in id_list:
             # Add those tokens one by one
             fl_tokens.feature.add().int64_list.value.append(token)
-
+        # apend  with end token
+        fl_tokens.feature.add().int64_list.value.append(self.vocab[EOS])
         return ex
+
+    def ids_to_string(self,tokens,length=None):
+        string = ''.join([self.reverse_vocab[x] for x in tokens[:length]])
+        return string
+
 
     def convert_token_to_id(self, token):
         '''
@@ -121,14 +130,14 @@ class BibPreppy(Preppy):
         ex = tf.train.SequenceExample()
         # A non-sequential feature of our example
         sequence_length = len(sequence)
-        ex.context.feature["length"].int64_list.value.append(sequence_length)
+        ex.context.feature["length"].int64_list.value.append(sequence_length+2) #+2For start and end
         ex.context.feature["book_id"].int64_list.value.append(book_id)
         # Feature lists for the two sequential features of our example
         fl_tokens = ex.feature_lists.feature_list["tokens"]
-
+        fl_tokens.feature.add().int64_list.value.append(self.vocab[START])
         for token in id_list:
             fl_tokens.feature.add().int64_list.value.append(token)
-
+        fl_tokens.feature.add().int64_list.value.append(self.vocab[EOS])
         return ex
     @staticmethod
     def parse(ex):

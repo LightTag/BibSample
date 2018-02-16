@@ -24,14 +24,15 @@ class Model():
 
             book_loss = tf.losses.sparse_softmax_cross_entropy(book_id, book_logits)
 
-            lm_loss = self.get_language_model_loss(lengths, outputs, sequence)
+            lm_loss,lm_preds = self.get_language_model_loss(lengths, outputs, sequence)
 
-
+            self.lm_preds = lm_preds
             self.total_loss = tf.reduce_mean(book_loss) + tf.reduce_mean(lm_loss)
             opt = tf.train.AdamOptimizer(self.lr)
             self.train = opt.minimize(self.total_loss,global_step=self.gs)
             self.target = book_id
             self.sequence = sequence
+            self.lengths = lengths
 
             self.make_summaries(book_logits, book_loss, lm_loss)
 
@@ -66,8 +67,9 @@ class Model():
         outputs = outputs[:, :-1, :]
         lm_logits = tf.contrib.layers.fully_connected(outputs, num_outputs=len(BP.vocab), activation_fn=None)
         mask = tf.sequence_mask(lengths - 1, tf.reduce_max(lengths) - 1)
+        lm_preds = tf.argmax(tf.nn.softmax(lm_logits),axis=2)
         lm_loss = tf.losses.sparse_softmax_cross_entropy(lm_target, lm_logits, weights=mask)
-        return lm_loss
+        return lm_loss,lm_preds
 
     def get_book_logits(self, state):
         '''
