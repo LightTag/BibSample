@@ -13,13 +13,10 @@ if __name__=="__main__":
         train_writer = tf.summary.FileWriter("./logs/train")
         val_writer = tf.summary.FileWriter("./logs/val")
         M = Model(next_element,gs=gs)
-        init =tf.global_variables_initializer()
         with tf.train.MonitoredTrainingSession(checkpoint_dir="./chkpoint",
                                                save_summaries_steps=None,
                                                save_summaries_secs=None, ) as sess:
 
-
-            sess.run(init)
             counter =0
             lr =0.001
             old_val_loss,new_val_loss =100,100
