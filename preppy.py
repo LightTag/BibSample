@@ -38,7 +38,7 @@ class Preppy():
         id_list = self.sentance_to_id_list(sequence)
         ex = tf.train.SequenceExample()
         # A non-sequential feature of our example
-        sequence_length = len(sequence)+2 #For start and end
+        sequence_length = len(id_list)+2 #For start and end
         #Add the context feature, here we just need length
         ex.context.feature["length"].int64_list.value.append(sequence_length)
         # Feature lists for the two sequential features of our example
