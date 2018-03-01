@@ -30,5 +30,5 @@ But if you just do this, what have you learnt ? Read the code
 
 ## Need to label data before putting it into Tensorflow ?
 This post and repo are brought to you by LightTag,  a platform to manage and execute NLP annotations with a team.
-Check us out at [LightTag.io](lighttag.io)
+Check us out at [LightTag.io](https://lighttag.io)
 ![Annotating with LightTagtext](./suggestions.gif)
